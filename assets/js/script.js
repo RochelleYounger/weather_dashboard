@@ -12,7 +12,7 @@ var queryArr = [];
 queryId = 0;
 
 
-/**********************QUERY_FUNCTIONS******************************/
+/**********************QUERY_FUNCTIONS_START******************************/
 var formSubmitHandler = function(event) {
     event.preventDefault();
     queryObj = {
@@ -32,14 +32,20 @@ var createQueryBtns = function(obj) {
     queryListItem.appendChild(queryItemContainer);
     
     var queryBtn = document.createElement("button");
-    queryBtn.setAttribute("id", obj.name);
+    queryBtn.setAttribute("id", "query");
+    queryBtn.setAttribute("data-query", obj.name);
     queryBtn.textContent = obj.name;
     queryItemContainer.appendChild(queryBtn);
+
+    var queryDeleteBtn = document.createElement("button");
+    queryDeleteBtn.textContent = "x";
+    queryDeleteBtn.setAttribute("id", "delete");
+    queryDeleteBtn.setAttribute("data-index", queryId);
+    queryItemContainer.appendChild(queryDeleteBtn);
     queryListEl.appendChild(queryListItem);
 
     obj.id = queryId;
     queryArr.push(obj);
-    console.log(queryArr);
     saveQueries();
     queryId++
 };
@@ -62,18 +68,50 @@ var renderQueries = function() {
     }
 };
 
-var updateQueries = function() {};
+var updateQueries = function(index) {
+    var updatedQueryArr = [];
+
+    for (var i = 0; i < queryArr.length; i++) {
+        if (queryArr[i].id !== parseInt(index)) {
+            updatedQueryArr.push(queryArr[i]);
+        }
+    }
+    queryArr = updatedQueryArr;
+    saveQueries();
+};
 
 var clearQueries = function() {
     queryArr = [];
     localStorage.setItem("queries", JSON.stringify(queryArr));
+    var queriesToClear = queryListEl.querySelectorAll("li");
+    for (i = 0; i < queriesToClear.length; i++) {
+        queriesToClear[i].remove();
+    }
 };
 
-var deleteQueryBtn = function() {};
+var deleteQueryBtn = function(index) {
+    console.log(index)
+    var queryToDelete = document.getElementById(index);
+    queryToDelete.remove();
+    updateQueries(index);
+}; 
 
+var queryActionsHandler = function(event) {
+    var clickedEl = event.target;
+
+    if (clickedEl.matches("#delete")) {
+        console.log("delete", clickedEl);
+        var queryIndex = clickedEl.getAttribute("data-index");
+        deleteQueryBtn(queryIndex);
+    } else if (clickedEl.matches("#query")) {
+        console.log("query", clickedEl);
+    }
+};
+/**********************QUERY_FUNCTIONS_END******************************/
 // event listeners
 formEl.addEventListener("submit", formSubmitHandler);
 clearBtn.addEventListener("click", clearQueries);
+queryListEl.addEventListener("click", queryActionsHandler)
 
 // on page load
 renderQueries();
