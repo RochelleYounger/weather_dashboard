@@ -3,6 +3,7 @@ var queryEl = document.getElementById("query-section");
 var formEl = document.getElementById("search-form");
 var queryListEl = document.getElementById("query-list");
 var queryInput = document.getElementById("city-search");
+var urlInput = queryInput.value.toLowerCase();
 var weatherEl = document.getElementById("weather-section");
 var clearBtn = document.getElementById("clear-btn");
 var searchBtn = document.getElementById("search-btn");
@@ -13,7 +14,6 @@ var queryArr = [];
 // global variables
 queryId = 0;
 var apiKey = "2d35594800ba27da2a5d3b9ee479f19f";
-var oneCallUrl = "";
 
 
 // // The date format method is taken from the  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
@@ -22,7 +22,7 @@ var oneCallUrl = "";
 
 /**********************API_FUNCTIONS_START******************************/
 var firstCall = function(input) {
-    var currentWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + input.value.toLowerCase() + "&appid=" + apiKey;
+    var currentWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + input + "&appid=" + apiKey;
     fetch(currentWeatherUrl)
     .then(function(response){
         if(response.ok) {
@@ -36,7 +36,7 @@ var firstCall = function(input) {
 };
 
 var secondCall = function(lat, long) {
-    var openCallUrl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + long + "&exclude={part}&appid=" + apiKey;
+    var openCallUrl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + long + "&exclude={part}&appid=" + apiKey + "&units=metric";
     fetch(openCallUrl)
     .then(function(response){
         if(response.ok) {
@@ -112,6 +112,12 @@ var forecastDisplay = function(data) {
     forecastSectionEl.classList.add("forecast");
     weatherEl.appendChild(forecastSectionEl);
 
+    var forecastTitleEl = document.createElement("h3");
+    forecastTitleEl.setAttribute("id", "forecast-title");
+    forecastTitleEl.classList.add("forecast-title");
+    forecastTitleEl.textContent = "5-Day Forecast";
+    forecastSectionEl.appendChild(forecastTitleEl);
+
     for (var i=0; i<5; i++) {
         var forecastCard = document.createElement("div");
         forecastCard.setAttribute("id", "forecast-card" + i)
@@ -151,20 +157,37 @@ var forecastDisplay = function(data) {
         forecastCard.appendChild(forecastHumidity);
     };
 };
+
+var removeWeatherData = function() {
+    var currentWeatherEl = document.getElementById("current-weather");
+    var forecastEl = document.getElementById("forecast");
+
+    if (!currentWeatherEl) {
+        return false;
+    } else {
+        currentWeatherEl.remove();
+        forecastEl.remove();
+    }
+};
 /**********************WEATHER_FUNCTIONS_END******************************/
 
 /**********************QUERY_FUNCTIONS_START******************************/
 var formSubmitHandler = function(event) {
     event.preventDefault();
-    queryObj = {
-        name: queryInput.value,
-    };
-    createQueryBtns(queryObj);
-    firstCall(queryInput);
-    queryInput.value = "";
+    if (!queryInput.value) {
+        alert("Field cannot be left empty.");
+        return false;
+    } else {
+        queryObj = {
+            name: queryInput.value.toLowerCase(),
+        };
+        createQueryBtns(queryObj);
+        removeWeatherData();
+        firstCall(queryInput.value);
+        queryInput.value = "";
+    }
 };
 
-// create btns with input value
 var createQueryBtns = function(obj) {
     var queryListItem = document.createElement("li");
     queryListItem.setAttribute("id", queryId);
@@ -237,6 +260,11 @@ var deleteQueryBtn = function(index) {
     updateQueries(index);
 }; 
 
+var searchQueries = function(input) {
+    removeWeatherData();
+    firstCall(input);
+};
+
 var queryActionsHandler = function(event) {
     var clickedEl = event.target;
 
@@ -245,9 +273,27 @@ var queryActionsHandler = function(event) {
         var queryIndex = clickedEl.getAttribute("data-index");
         deleteQueryBtn(queryIndex);
     } else if (clickedEl.matches("#query")) {
+        var queryCity = clickedEl.getAttribute("data-query");
+        console.log(queryCity);
+        searchQueries(queryCity);
         console.log("query", clickedEl);
     }
 };
+
+var searchSavedQuery = function() {
+    console.log("loaded");
+    var savedQueries = localStorage.getItem("queries");
+
+    if (!savedQueries) {
+      return false;
+    } else {
+        var parsedQueries = JSON.parse(savedQueries);
+        console.log(parsedQueries);
+        var firstQuery = parsedQueries[0].name;
+        firstCall(firstQuery);
+    }
+
+}
 /**********************QUERY_FUNCTIONS_END******************************/
 
 // event listeners
@@ -258,3 +304,4 @@ queryListEl.addEventListener("click", queryActionsHandler);
 
 // on page load
 renderQueries();
+searchSavedQuery();
