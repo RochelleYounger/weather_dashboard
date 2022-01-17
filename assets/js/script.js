@@ -4,13 +4,49 @@ var formEl = document.getElementById("search-form");
 var queryListEl = document.getElementById("query-list");
 var queryInput = document.getElementById("city-search");
 var clearBtn = document.getElementById("clear-btn");
+var searchBtn = document.getElementById("search-btn");
 
 // creating array to hold queries
 var queryArr = [];
 
 // global variables
 queryId = 0;
+var apiKey = "2d35594800ba27da2a5d3b9ee479f19f";
+var oneCallUrl = "";
 
+
+
+
+/**********************API_FUNCTIONS_START******************************/
+var firstCall = function(input) {
+    var currentWeatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + input.value.toLowerCase() + "&appid=" + apiKey;
+    fetch(currentWeatherUrl)
+    .then(function(response){
+        if(response.ok) {
+            response.json().then(function(data) {
+                console.log(data);
+                // console.log(data.coord);
+                secondCall(data.coord.lat, data.coord.lon);
+            })
+        }
+    })
+};
+
+var secondCall = function(lat, long) {
+    var openCallUrl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + long + "&exclude={part}&appid=" + apiKey;
+    fetch(openCallUrl)
+    .then(function(response){
+        if(response.ok) {
+            response.json().then(function(data) {
+                console.log(data);
+            })
+        }
+    })
+};
+/**********************API_FUNCTIONS_END******************************/
+
+/**********************WEATHER_FUNCTIONS_START******************************/
+/**********************WEATHER_FUNCTIONS_END******************************/
 
 /**********************QUERY_FUNCTIONS_START******************************/
 var formSubmitHandler = function(event) {
@@ -19,7 +55,7 @@ var formSubmitHandler = function(event) {
         name: queryInput.value,
     };
     createQueryBtns(queryObj);
-
+    firstCall(queryInput);
     queryInput.value = "";
 };
 
@@ -108,10 +144,12 @@ var queryActionsHandler = function(event) {
     }
 };
 /**********************QUERY_FUNCTIONS_END******************************/
+
 // event listeners
 formEl.addEventListener("submit", formSubmitHandler);
 clearBtn.addEventListener("click", clearQueries);
-queryListEl.addEventListener("click", queryActionsHandler)
+queryListEl.addEventListener("click", queryActionsHandler);
+// searchBtn.addEventListener("click", firstCall(queryInput));
 
 // on page load
 renderQueries();
