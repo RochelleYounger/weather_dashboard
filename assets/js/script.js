@@ -3,6 +3,7 @@ var queryEl = document.getElementById("query-section");
 var formEl = document.getElementById("search-form");
 var queryListEl = document.getElementById("query-list");
 var queryInput = document.getElementById("city-search");
+var weatherEl = document.getElementById("weather-section");
 var clearBtn = document.getElementById("clear-btn");
 var searchBtn = document.getElementById("search-btn");
 
@@ -15,7 +16,9 @@ var apiKey = "2d35594800ba27da2a5d3b9ee479f19f";
 var oneCallUrl = "";
 
 
-
+// // The date format method is taken from the  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+// var date=new Date(response.dt*1000).toLocaleDateString();
+// var date = new Date(data.daily[0].dt*1000).toLocaleDateString();
 
 /**********************API_FUNCTIONS_START******************************/
 var firstCall = function(input) {
@@ -25,7 +28,7 @@ var firstCall = function(input) {
         if(response.ok) {
             response.json().then(function(data) {
                 console.log(data);
-                // console.log(data.coord);
+                displayFirstCallData(data);
                 secondCall(data.coord.lat, data.coord.lon);
             })
         }
@@ -39,6 +42,8 @@ var secondCall = function(lat, long) {
         if(response.ok) {
             response.json().then(function(data) {
                 console.log(data);
+                currentWeatherDisplay(data);
+                forecastDisplay(data);
             })
         }
     })
@@ -46,6 +51,106 @@ var secondCall = function(lat, long) {
 /**********************API_FUNCTIONS_END******************************/
 
 /**********************WEATHER_FUNCTIONS_START******************************/
+var displayFirstCallData = function(data) {
+    var currentSectionEl = document.createElement("div");
+    currentSectionEl.setAttribute("id", "current-weather");
+    currentSectionEl.classList.add("current");
+
+    var currentCityEl = document.createElement("h3");
+    currentCityEl.setAttribute("id", "current-city");
+    currentCityEl.classList.add("city");
+    currentCityEl.textContent = data.name;
+    currentSectionEl.appendChild(currentCityEl);
+    weatherEl.appendChild(currentSectionEl);
+};
+
+var currentWeatherDisplay = function(data) {
+    var currentSectionEl = document.getElementById("current-weather");
+
+    var date = new Date(data.current.dt*1000).toLocaleDateString();
+    var currentDate = document.createElement("p");
+    currentDate.setAttribute("id", "current-date");
+    currentDate.classList.add("date");
+    currentDate.textContent = date;
+    currentSectionEl.appendChild(currentDate);
+
+    var currentIcon = document.createElement("img");
+    currentIcon.setAttribute("src", "http://openweathermap.org/img/wn/" + data.current.weather[0].icon + "@2x.png")
+    currentIcon.setAttribute("id", "current-icon");
+    currentIcon.classList.add("icon");
+    currentSectionEl.appendChild(currentIcon);
+
+    var temperature = data.current.temp;
+    var currentTemp = document.createElement("p");
+    currentTemp.setAttribute("id", "current-temp");
+    currentTemp.classList.add("temp");
+    currentTemp.textContent = temperature;
+    currentSectionEl.appendChild(currentTemp);
+
+    var currentHumidity = document.createElement("p");
+    currentHumidity.setAttribute("id", "current-temp");
+    currentHumidity.classList.add("humidity");
+    currentHumidity.textContent = data.current.humidity;
+    currentSectionEl.appendChild(currentHumidity);
+
+    var currentWind = document.createElement("p");
+    currentWind.setAttribute("id", "current-wind");
+    currentWind.classList.add("wind");
+    currentWind.textContent = data.current.wind_speed;
+    currentSectionEl.appendChild(currentWind);
+
+    var currentUvi = document.createElement("p");
+    currentUvi.setAttribute("id", "current-uvi");
+    currentUvi.classList.add("uvi");
+    currentUvi.textContent = data.current.uvi;
+    currentSectionEl.appendChild(currentUvi);
+};
+
+var forecastDisplay = function(data) {
+    var forecastSectionEl = document.createElement("div");
+    forecastSectionEl.setAttribute("id", "forecast");
+    forecastSectionEl.classList.add("forecast");
+    weatherEl.appendChild(forecastSectionEl);
+
+    for (var i=0; i<5; i++) {
+        var forecastCard = document.createElement("div");
+        forecastCard.setAttribute("id", "forecast-card" + i)
+        forecastCard.classList.add("card");
+        forecastSectionEl.appendChild(forecastCard);
+            
+        var date = new Date(data.daily[i+1].dt*1000).toLocaleDateString();
+        var forecastDate = document.createElement("p");
+        forecastDate.setAttribute("id", "forecast-date");
+        forecastDate.classList.add("date");
+        forecastDate.textContent = date;
+        forecastCard.appendChild(forecastDate);
+
+        var forecastIcon = document.createElement("img");
+        forecastIcon.setAttribute("src", "http://openweathermap.org/img/wn/" + data.daily[i+1].weather[0].icon + "@2x.png")
+        forecastIcon.setAttribute("id", "forecast-icon");
+        forecastIcon.classList.add("icon");
+        forecastCard.appendChild(forecastIcon);
+
+        var temperature = data.daily[i+1].temp.day;
+        var forecastTemp = document.createElement("p");
+        forecastTemp.setAttribute("id", "forecast-temp");
+        forecastTemp.classList.add("temp");
+        forecastTemp.textContent = temperature;
+        forecastCard.appendChild(forecastTemp);
+
+        var forecastWind = document.createElement("p");
+        forecastWind.setAttribute("id", "forecast-wind");
+        forecastWind.classList.add("wind");
+        forecastWind.textContent = data.daily[i+1].wind_speed;
+        forecastCard.appendChild(forecastWind);
+
+        var forecastHumidity = document.createElement("p");
+        forecastHumidity.setAttribute("id", "forecast-temp");
+        forecastHumidity.classList.add("humidity");
+        forecastHumidity.textContent = data.daily[i+1].humidity;
+        forecastCard.appendChild(forecastHumidity);
+    };
+};
 /**********************WEATHER_FUNCTIONS_END******************************/
 
 /**********************QUERY_FUNCTIONS_START******************************/
