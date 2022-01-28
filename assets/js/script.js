@@ -27,7 +27,7 @@ var firstCall = function(input) {
     .then(function(response){
         if(response.ok) {
             response.json().then(function(data) {
-                console.log(data);
+                // console.log(data);
                 displayFirstCallData(data);
                 secondCall(data.coord.lat, data.coord.lon);
             })
@@ -41,7 +41,7 @@ var secondCall = function(lat, long) {
     .then(function(response){
         if(response.ok) {
             response.json().then(function(data) {
-                console.log(data);
+                // console.log(data);
                 currentWeatherDisplay(data);
                 forecastDisplay(data);
             })
@@ -54,62 +54,68 @@ var secondCall = function(lat, long) {
 var displayFirstCallData = function(data) {
     var currentSectionEl = document.createElement("div");
     currentSectionEl.setAttribute("id", "current-weather");
-    currentSectionEl.classList.add("current");
+    currentSectionEl.classList.add("ms-3");
+
+    var currentWeatherHeader = document.createElement("div");
+    currentWeatherHeader.setAttribute("id", "current-header");
+    currentWeatherHeader.classList.add("header");
+    currentSectionEl.appendChild(currentWeatherHeader);
 
     var currentCityEl = document.createElement("h3");
     currentCityEl.setAttribute("id", "current-city");
-    currentCityEl.classList.add("city");
+    currentCityEl.classList.add("d-inline", "mx-2");
     currentCityEl.textContent = data.name;
-    currentSectionEl.appendChild(currentCityEl);
+    currentWeatherHeader.appendChild(currentCityEl);
     weatherEl.appendChild(currentSectionEl);
 };
 
 var currentWeatherDisplay = function(data) {
     var currentSectionEl = document.getElementById("current-weather");
+    var currentWeatherHeader = document.getElementById("current-header")
 
     var date = new Date(data.current.dt*1000).toLocaleDateString();
-    var currentDate = document.createElement("p");
+    var currentDate = document.createElement("h3");
     currentDate.setAttribute("id", "current-date");
-    currentDate.classList.add("date");
+    currentDate.classList.add("d-inline");
     currentDate.textContent = date;
-    currentSectionEl.appendChild(currentDate);
+    currentWeatherHeader.appendChild(currentDate);
 
     var currentIcon = document.createElement("img");
     currentIcon.setAttribute("src", "http://openweathermap.org/img/wn/" + data.current.weather[0].icon + "@2x.png")
     currentIcon.setAttribute("id", "current-icon");
-    currentIcon.classList.add("icon");
-    currentSectionEl.appendChild(currentIcon);
+    currentIcon.classList.add("d-inline", "icon", "bg-secondary", "rounded-circle");
+    currentWeatherHeader.appendChild(currentIcon);
 
     var temperature = data.current.temp;
     var currentTemp = document.createElement("p");
     currentTemp.setAttribute("id", "current-temp");
     currentTemp.classList.add("temp");
-    currentTemp.textContent = temperature;
+    currentTemp.textContent = "Temp: " + temperature + "°C";
     currentSectionEl.appendChild(currentTemp);
-
-    var currentHumidity = document.createElement("p");
-    currentHumidity.setAttribute("id", "current-temp");
-    currentHumidity.classList.add("humidity");
-    currentHumidity.textContent = data.current.humidity;
-    currentSectionEl.appendChild(currentHumidity);
 
     var currentWind = document.createElement("p");
     currentWind.setAttribute("id", "current-wind");
     currentWind.classList.add("wind");
-    currentWind.textContent = data.current.wind_speed;
+    currentWind.textContent = "Wind: " + data.current.wind_speed + " MPH";
     currentSectionEl.appendChild(currentWind);
+
+    var currentHumidity = document.createElement("p");
+    currentHumidity.setAttribute("id", "current-temp");
+    currentHumidity.classList.add("humidity");
+    currentHumidity.textContent = "Humidity: " + data.current.humidity + " %";
+    currentSectionEl.appendChild(currentHumidity);
 
     var currentUvi = document.createElement("p");
     currentUvi.setAttribute("id", "current-uvi");
     currentUvi.classList.add("uvi");
-    currentUvi.textContent = data.current.uvi;
+    currentUvi.textContent = "UV Index: " + data.current.uvi;
     currentSectionEl.appendChild(currentUvi);
 };
 
 var forecastDisplay = function(data) {
     var forecastSectionEl = document.createElement("div");
     forecastSectionEl.setAttribute("id", "forecast");
-    forecastSectionEl.classList.add("forecast");
+    forecastSectionEl.classList.add("container");
     weatherEl.appendChild(forecastSectionEl);
 
     var forecastTitleEl = document.createElement("h3");
@@ -117,15 +123,20 @@ var forecastDisplay = function(data) {
     forecastTitleEl.classList.add("forecast-title");
     forecastTitleEl.textContent = "5-Day Forecast";
     forecastSectionEl.appendChild(forecastTitleEl);
+    
+    var forecastRowEl = document.createElement("div");
+    forecastRowEl.setAttribute("id", "forecast-row");
+    forecastRowEl.classList.add("row", "justify-content-evenly");
+    forecastSectionEl.appendChild(forecastRowEl);
 
     for (var i=0; i<5; i++) {
         var forecastCard = document.createElement("div");
         forecastCard.setAttribute("id", "forecast-card" + i)
-        forecastCard.classList.add("card");
-        forecastSectionEl.appendChild(forecastCard);
+        forecastCard.classList.add("col-12", "col-md-3", "col-lg-2","m-1", "p-3", "bg-light");
+        forecastRowEl.appendChild(forecastCard);
             
         var date = new Date(data.daily[i+1].dt*1000).toLocaleDateString();
-        var forecastDate = document.createElement("p");
+        var forecastDate = document.createElement("h4");
         forecastDate.setAttribute("id", "forecast-date");
         forecastDate.classList.add("date");
         forecastDate.textContent = date;
@@ -134,26 +145,26 @@ var forecastDisplay = function(data) {
         var forecastIcon = document.createElement("img");
         forecastIcon.setAttribute("src", "http://openweathermap.org/img/wn/" + data.daily[i+1].weather[0].icon + "@2x.png")
         forecastIcon.setAttribute("id", "forecast-icon");
-        forecastIcon.classList.add("icon");
+        forecastIcon.classList.add("bg-secondary", "icon", "rounded-circle");
         forecastCard.appendChild(forecastIcon);
 
         var temperature = data.daily[i+1].temp.day;
         var forecastTemp = document.createElement("p");
         forecastTemp.setAttribute("id", "forecast-temp");
         forecastTemp.classList.add("temp");
-        forecastTemp.textContent = temperature;
+        forecastTemp.textContent = "Temp: " + temperature + "°C";
         forecastCard.appendChild(forecastTemp);
 
         var forecastWind = document.createElement("p");
         forecastWind.setAttribute("id", "forecast-wind");
         forecastWind.classList.add("wind");
-        forecastWind.textContent = data.daily[i+1].wind_speed;
+        forecastWind.textContent = "Wind: " + data.daily[i+1].wind_speed + "MPH";
         forecastCard.appendChild(forecastWind);
 
         var forecastHumidity = document.createElement("p");
         forecastHumidity.setAttribute("id", "forecast-temp");
         forecastHumidity.classList.add("humidity");
-        forecastHumidity.textContent = data.daily[i+1].humidity;
+        forecastHumidity.textContent = "Humidity: " + data.daily[i+1].humidity + " %";
         forecastCard.appendChild(forecastHumidity);
     };
 };
@@ -189,24 +200,29 @@ var formSubmitHandler = function(event) {
 };
 
 var createQueryBtns = function(obj) {
-    var queryListItem = document.createElement("li");
-    queryListItem.setAttribute("id", queryId);
+    // var queryListItem = document.createElement("li");
+    // queryListItem.setAttribute("id", queryId);
+    // queryListItem.classList.add("list-group-item", "w-100", "mb-1");
 
     var queryItemContainer = document.createElement("div");
-    queryListItem.appendChild(queryItemContainer);
+    queryItemContainer.setAttribute("id", queryId);
+    queryItemContainer.classList.add("row", "w-100", "btn-group");
+    // queryListItem.appendChild(queryItemContainer);
     
     var queryBtn = document.createElement("button");
     queryBtn.setAttribute("id", "query");
     queryBtn.setAttribute("data-query", obj.name);
     queryBtn.textContent = obj.name;
+    queryBtn.classList.add("col-9", "col-sm-9", "col-lg-9", "btn", "btn-outline-dark", "w-85");
     queryItemContainer.appendChild(queryBtn);
 
     var queryDeleteBtn = document.createElement("button");
     queryDeleteBtn.textContent = "x";
     queryDeleteBtn.setAttribute("id", "delete");
     queryDeleteBtn.setAttribute("data-index", queryId);
+    queryDeleteBtn.classList.add("col-1", "col-sm-1", "col-lg-1", "btn", "btn-outline-danger");
     queryItemContainer.appendChild(queryDeleteBtn);
-    queryListEl.appendChild(queryListItem);
+    queryListEl.appendChild(queryItemContainer);
 
     obj.id = queryId;
     queryArr.push(obj);
@@ -254,8 +270,9 @@ var clearQueries = function() {
 };
 
 var deleteQueryBtn = function(index) {
-    console.log(index)
+    // console.log(index)
     var queryToDelete = document.getElementById(index);
+    console.log(queryToDelete)
     queryToDelete.remove();
     updateQueries(index);
 }; 
@@ -269,26 +286,26 @@ var queryActionsHandler = function(event) {
     var clickedEl = event.target;
 
     if (clickedEl.matches("#delete")) {
-        console.log("delete", clickedEl);
+        // console.log("delete", clickedEl);
         var queryIndex = clickedEl.getAttribute("data-index");
         deleteQueryBtn(queryIndex);
     } else if (clickedEl.matches("#query")) {
         var queryCity = clickedEl.getAttribute("data-query");
-        console.log(queryCity);
+        // console.log(queryCity);
         searchQueries(queryCity);
         console.log("query", clickedEl);
     }
 };
 
 var searchSavedQuery = function() {
-    console.log("loaded");
+    // console.log("loaded");
     var savedQueries = localStorage.getItem("queries");
 
     if (!savedQueries) {
       return false;
     } else {
         var parsedQueries = JSON.parse(savedQueries);
-        console.log(parsedQueries);
+        // console.log(parsedQueries);
         var firstQuery = parsedQueries[0].name;
         firstCall(firstQuery);
     }
