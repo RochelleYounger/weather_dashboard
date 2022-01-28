@@ -107,7 +107,14 @@ var currentWeatherDisplay = function(data) {
 
     var currentUvi = document.createElement("p");
     currentUvi.setAttribute("id", "current-uvi");
-    currentUvi.classList.add("uvi");
+    currentUvi.classList.add("uvi", "text-white");
+    if (data.current.uvi < 2.5) {
+        currentUvi.classList.add("bg-success");
+    } else if (data.current.uvi < 5.5) {
+        currentUvi.classList.add("bg-warning");
+    } else {
+        currentUvi.classList.add("bg-danger");
+    }
     currentUvi.textContent = "UV Index: " + data.current.uvi;
     currentSectionEl.appendChild(currentUvi);
 };
@@ -263,7 +270,7 @@ var updateQueries = function(index) {
 var clearQueries = function() {
     queryArr = [];
     localStorage.setItem("queries", JSON.stringify(queryArr));
-    var queriesToClear = queryListEl.querySelectorAll("li");
+    var queriesToClear = queryListEl.querySelectorAll(".btn-group");
     for (i = 0; i < queriesToClear.length; i++) {
         queriesToClear[i].remove();
     }
